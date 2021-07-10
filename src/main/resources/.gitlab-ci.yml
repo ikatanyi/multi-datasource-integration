@@ -1,0 +1,43 @@
+stages: 
+  - build
+  - staging
+  - deploy
+
+build:
+  stage: build
+  tags:
+    - mskisumu
+  script:  
+    - mvn package -DskipTests
+  artifacts:
+    paths:
+      - target/*.jar
+    expire_in: 1d
+      
+deploy_dev:
+    stage: staging
+    tags:
+    - mskisumu
+    before_script:
+      #- export BUILD_NUMBER = $(grep "buildNumber=" "buildNumber.properties" | cut -d'=' -f2-)
+
+    script:
+        #- echo $BUILD_NUMBER
+        - sudo rsync -rav -e --stats target/integ-ms-akuh-kisumu-prov-v2.jar /opt/providers/latest/integ-ms-akuh-kisumu-prov-v2.jar
+        - sudo chmod 775 /var/log/mskisumu-app.log
+        - sudo service mskisumu-app restart
+       
+deploy_prod:
+    stage: deploy
+    tags:
+    - mskisumu
+    script:
+        - sshpass -V
+        - sshpass -p "$QA_SERVER_PASSWORD" sudo rsync -rav -e --stats target/integ-ms-akuh-kisumu-prov-v2.jar smart@192.180.3.15:/opt/providers/latest/integ-ms-akuh-kisumu-prov-v2.jar
+        - sshpass -p "$QA_SERVER_PASSWORD" sudo service mskisumu-app restart
+    
+    only:
+        - master
+cache:
+  paths:
+    - ~.m2/repository/

@@ -1,0 +1,8 @@
+FROM frolvlad/alpine-oraclejdk8
+LABEL maintainer = "kelvin.sasaka@smartapplicationsgroup.com" 
+VOLUME /opt/micro-services/
+ADD target/SMART-AKUH-EDI-SERVICE.jar /opt/micro-services/
+ADD src/main/resources/application.properties /opt/micro-services/config/
+WORKDIR /opt/micro-services/
+EXPOSE 8203
+ENTRYPOINT ["java", "-jar","SMART-AKUH-EDI-SERVICE.jar — spring.config.name=application — spring.config.location=classpath:/opt/micro-services/config"]

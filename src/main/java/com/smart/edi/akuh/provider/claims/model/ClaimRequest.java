@@ -2,14 +2,16 @@ package com.smart.edi.akuh.provider.claims.model;
 
 import com.smart.edi.akuh.EDIConstant;
 import com.smart.edi.akuh.provider.claims.data.DiagnosisData;
-import com.smart.edi.akuh.util.ICD10;
 import com.smart.edi.akuh.provider.claims.data.InvoiceData;
+import com.smart.edi.akuh.util.ICD10;
 import com.smart.edi.akuh.util.RoundUtil;
 import lombok.Data;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
 import java.io.Serializable;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -106,13 +108,15 @@ public class ClaimRequest implements Serializable {
     
 
     public String claimToJson() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.0");
+        DateTimeFormatter newFormat = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         JSONObject claim = new JSONObject();
 
-        claim.put("claim_code", this.getVisitNumber());
+        claim.put("claim_code", this.getInvoiceNo());
         claim.put("payer_code", this.getPayerCode());
         claim.put("payer_name", this.getPayerName());
-        claim.put("amount", this.getGrossAmount()); //invoice totals
-        claim.put("gross_amount", this.getNetAmount());
+        claim.put("amount",this.getNetAmount() );
+        claim.put("gross_amount", this.getGrossAmount());
         claim.put("batch_number", "");
 
         claim.putOpt("dispatch_date", JSONObject.NULL);
@@ -137,7 +141,7 @@ public class ClaimRequest implements Serializable {
         pd.put("is_primary", JSONObject.NULL);
         diagnosis.put(pd);
 
-        claim.put("diagnosis",this.getDiagnosis().isEmpty()?diagnosis:this.getDiagnosis().isEmpty());
+        claim.put("diagnosis",this.getDiagnosis().isEmpty()?diagnosis:this.getDiagnosis());
 
         //pre auth
         JSONArray preauth = new JSONArray();
@@ -161,15 +165,17 @@ public class ClaimRequest implements Serializable {
         JSONArray invoices = new JSONArray();
 
         JSONObject invoice = new JSONObject();
-        invoice.put("amount", this.getGrossAmount());
-        invoice.put("gross_amount", this.getNetAmount());
+        invoice.put("amount", this.getNetAmount());
+        invoice.put("gross_amount",this.getGrossAmount() );
         invoice.put("invoice_date", this.getVisitStart());
-        invoice.put("invoice_number", this.getVisitNumber());
+        invoice.put("invoice_number", this.getInvoiceNo());
         invoice.put("service_type", this.getServiceType());
 
         JSONArray pmodifier = new JSONArray();
 
-        this.getCopays().stream().map((c) -> {
+        this.getCopays().stream()
+                .filter(x->x.getCharge()>0)
+                .map((c) -> {
             JSONObject modifier = new JSONObject();
             modifier.putOpt("type", c.getType());
             modifier.putOpt("amount", c.getCharge());
@@ -179,7 +185,7 @@ public class ClaimRequest implements Serializable {
             pmodifier.put(modifier);
         });
 
-        if (pmodifier.length() <= 0) {
+        if (pmodifier.isEmpty()) {
             JSONObject modifier = new JSONObject();
             modifier.putOpt("type", "");
             modifier.putOpt("amount", 0);
@@ -196,7 +202,7 @@ public class ClaimRequest implements Serializable {
                 line.put("item_code", bill.getItemCode());
                 line.put("item_name", bill.getItemName());
                 line.put("service_group", bill.getServicePoint());
-                line.put("charge_date", bill.getChargeDate());
+                line.put("charge_date", newFormat.format(LocalDate.parse(bill.getChargeDate(), formatter)));
                 line.put("unit_price", bill.getUnitPrice());
                 line.put("quantity", bill.getQuantity());
                 line.put("amount", bill.getAmount());

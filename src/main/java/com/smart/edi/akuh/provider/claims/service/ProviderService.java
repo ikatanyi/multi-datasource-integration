@@ -1,13 +1,8 @@
 package com.smart.edi.akuh.provider.claims.service;
 
 import com.smart.edi.akuh.provider.claims.data.DiagnosisData;
-import com.smart.edi.akuh.provider.claims.model.Copay;
-import com.smart.edi.akuh.provider.claims.model.Claim;
-import com.smart.edi.akuh.provider.claims.model.ClaimRequest;
+import com.smart.edi.akuh.provider.claims.model.*;
 import com.smart.edi.akuh.provider.claims.data.InvoiceData;
-import com.smart.edi.akuh.provider.claims.model.DiagnosisInterface;
-import com.smart.edi.akuh.provider.claims.model.Invoiceline;
-import com.smart.edi.akuh.provider.claims.model.InvoicelineInterface;
 import com.smart.edi.akuh.provider.claims.repository.ClaimRepository;
 import com.smart.edi.akuh.provider.claims.repository.InvoiceRepository;
 import lombok.RequiredArgsConstructor;
@@ -36,29 +31,30 @@ public class ProviderService {
     }
 
     private InvoiceData findInvoices(String invoiceNo) {
-            Invoiceline invoiceLine;
-            Copay copay;
-            List<InvoicelineInterface> lines = invoiceRepository.findInvoices(invoiceNo);
-            List<Copay> copays = new ArrayList<>();
-            List<Invoiceline>invoiceLines = new ArrayList<>();
-            InvoiceData invoice = new InvoiceData(invoiceNo);            
-            for(InvoicelineInterface line: lines){
-                invoiceLine = new Invoiceline();
-                invoiceLine.setAmount(line.getTotalSpnrAmt());
-                invoiceLine.setUnitPrice(line.getSpnrAmt());
-                invoiceLine.setChargeDate(line.getCtdChrgDt());
-                invoiceLine.setItemCode(line.getCtdItemCd());
-                invoiceLine.setItemName(line.getCtdItemDes().trim());
-                invoiceLine.setQuantity(line.getQty());
-                invoiceLine.setServicePoint(line.getItemGroup());
-                invoiceLines.add(invoiceLine);                
-                copay = new Copay();
-                copay.setCharge(line.getTotalPatAmt()!=null?line.getTotalPatAmt():0.0);
-                copays.add(copay);
-            }        
-            invoice.setCopays(((ArrayList<Copay>) copays ));
-            invoice.setLines((ArrayList<Invoiceline>) invoiceLines);
-            return invoice;
+        Invoiceline invoiceLine;
+        Copay copay;
+        List<InvoicelineInterface> lines = invoiceRepository.findInvoices(invoiceNo);
+        List<Copay> copays = new ArrayList<>();
+        List<Invoiceline>invoiceLines = new ArrayList<>();
+        InvoiceData invoice = new InvoiceData(invoiceNo);
+        for(InvoicelineInterface line: lines){
+            invoiceLine = new Invoiceline();
+            invoiceLine.setAmount(line.getCopay()+(line.getTotalSpnrAmt()!=null?line.getTotalSpnrAmt():0.0));
+            invoiceLine.setNetAmount(line.getTotalSpnrAmt()!=null?line.getTotalSpnrAmt():0.0);
+            invoiceLine.setUnitPrice((line.getSpnrAmt()!=null?line.getSpnrAmt():0.0)+(line.getPatientAmt()!=null?line.getPatientAmt():0.0));
+            invoiceLine.setChargeDate(line.getCtdChrgDt());
+            invoiceLine.setItemCode(line.getCtdItemCd());
+            invoiceLine.setItemName(line.getCtdItemDes().trim());
+            invoiceLine.setQuantity(line.getQty());
+            invoiceLine.setServicePoint(line.getItemGroup());
+            invoiceLines.add(invoiceLine);
+            copay = new Copay();
+            copay.setCharge(line.getCopay()!=null?line.getCopay():0.0);
+            copays.add(copay);
+        }
+        invoice.setCopays(((ArrayList<Copay>) copays ));
+        invoice.setLines((ArrayList<Invoiceline>) invoiceLines);
+        return invoice;
     }
     
     private List<DiagnosisData> getDiagnosis (String invoiceNo){

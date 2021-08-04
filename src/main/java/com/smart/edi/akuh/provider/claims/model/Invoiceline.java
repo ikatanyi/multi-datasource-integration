@@ -3,6 +3,7 @@ package com.smart.edi.akuh.provider.claims.model;
 import java.time.LocalDate;
 import lombok.Data;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 
 /**
@@ -21,6 +22,7 @@ public class Invoiceline {
     private String servicePoint;
     private Date billingDatetime;
     private Boolean cancellation;
+    private Double netAmount;
 
     public void setQuantity(double quantity) {
         this.quantity = quantity;

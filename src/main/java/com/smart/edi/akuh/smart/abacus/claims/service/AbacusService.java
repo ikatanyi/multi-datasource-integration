@@ -12,6 +12,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -26,7 +29,8 @@ public class AbacusService {
 
     @Scheduled(fixedDelay = 5000)
     public void save() {
-        List<String> invoices = stgSlinkClaimRepository.findPendingInvoices(0);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-MMM-yyyy");
+        List<String> invoices = stgSlinkClaimRepository.findPendingInvoices("SKSPKDN_4", 0);
 
         if(invoices.isEmpty()|| invoices==null)
             return;
@@ -42,6 +46,8 @@ public class AbacusService {
                             logEdiClaimsDelivery = ediClaim2.get();
                         }
                         else {
+                            LocalDate localDate = LocalDate.parse(x.getInvoiceDate()!=null?x.getInvoiceDate():LocalDate.now().toString());
+                            logEdiClaimsDelivery.setClaimDate(localDate);
                             logEdiClaimsDelivery.setInvoiceNr(x.getInvoiceNo());
                             logEdiClaimsDelivery.setJsonString(x.claimToJson());
                             logEdiClaimsDelivery.setProviderKey("SKSPKDN_4");
@@ -50,13 +56,15 @@ public class AbacusService {
                         return ediClaim;
                     })
                     .collect(Collectors.toList());
-            StgSlinkClaim stgSlinkClaim = findStgClaimByInvoiceAndProvierKey(invoiceNo, "SKSPKDN_4");
+            StgSlinkClaim stgSlinkClaim = findStgClaimByInvoiceAndProvierKey(invoiceNo, 0);
             if (result == null || result.isEmpty()) {
                 stgSlinkClaim.setBackendProviderStatus(2);
+                stgSlinkClaim.setBackendProviderFetchDate(LocalDateTime.now());
                 stgSlinkClaim.setBackendProviderStatusMsg("not found on provider server");
             }
             else{
                 stgSlinkClaim.setBackendProviderStatus(1);
+                stgSlinkClaim.setBackendProviderFetchDate(LocalDateTime.now());
                 stgSlinkClaim.setBackendProviderStatusMsg("Claim Retrieved successfully");
             }
             saveStgClaim(stgSlinkClaim);
@@ -64,9 +72,10 @@ public class AbacusService {
     }
 
 
-    @Scheduled(fixedDelay =3600000)
+    @Scheduled(fixedDelay =1800000)
     public void claimCleanUp() {
-        List<String> invoices = stgSlinkClaimRepository.findPendingInvoices(2);
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d-MMM-yyyy");
+        List<String> invoices = stgSlinkClaimRepository.findPendingInvoices("SKSPKDN_4",2);
         if(invoices.isEmpty()|| invoices==null)
             return;
         List<ClaimRequest> claimrequests = providerService.getClaimsToSwitch(invoices);
@@ -80,6 +89,8 @@ public class AbacusService {
                             logEdiClaimsDelivery = ediClaim2.get();
                         }
                         else {
+                            LocalDate localDate = LocalDate.parse(x.getInvoiceDate()!=null?x.getInvoiceDate():LocalDate.now().toString());
+                            logEdiClaimsDelivery.setClaimDate(localDate);
                             logEdiClaimsDelivery.setInvoiceNr(x.getInvoiceNo());
                             logEdiClaimsDelivery.setJsonString(x.claimToJson());
                             logEdiClaimsDelivery.setProviderKey("SKSPKDN_4");
@@ -88,7 +99,7 @@ public class AbacusService {
                         return ediClaim;
                     })
                     .collect(Collectors.toList());
-            StgSlinkClaim stgSlinkClaim = findStgClaimByInvoiceAndProvierKey(invoiceNo, "SKSPKDN_4");
+            StgSlinkClaim stgSlinkClaim = findStgClaimByInvoiceAndProvierKey(invoiceNo, 2);
             if (result == null || result.isEmpty()) {
                 stgSlinkClaim.setBackendProviderStatus(2);
                 stgSlinkClaim.setBackendProviderStatusMsg("not found on provider server");
@@ -110,8 +121,8 @@ public class AbacusService {
         return logEdiClaimsDeliveryRepository.save(logEdiClaimsDelivery);
     }
 
-    public StgSlinkClaim findStgClaimByInvoiceAndProvierKey(String invoiceNo, String providerKey) {
-        return stgSlinkClaimRepository.findByInvoiceNr(invoiceNo, providerKey);
+    public StgSlinkClaim findStgClaimByInvoiceAndProvierKey(String invoiceNo, Integer status) {
+        return stgSlinkClaimRepository.findByInvoiceNr(invoiceNo, status);
     }
 
     @Transactional

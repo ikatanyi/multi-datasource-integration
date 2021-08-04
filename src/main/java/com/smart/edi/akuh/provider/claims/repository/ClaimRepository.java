@@ -19,7 +19,7 @@ import java.util.List;
  * @author Ikatanyi
  */
 public interface ClaimRepository extends JpaRepository<Claim, Long>, JpaSpecificationExecutor<Claim> {
-    @Query(value="SELECT d FROM Claim d WHERE d.billNo in :invoices AND d.partyCode='46026'")
+    @Query(value="SELECT d FROM Claim d WHERE d.billNo in :invoices")
     List<Claim> findClaims(@Param("invoices") List<String>invoices);
     
     @Query(value = "SELECT \n"

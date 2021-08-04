@@ -4,11 +4,12 @@ import java.time.LocalDate;
 
 public interface InvoicelineInterface {
     public Double getTotalSpnrAmt();
+    public Double getCopay();
     public Double getSpnrAmt();
     public String getCtdChrgDt();
     public String getCtdItemCd();
     public String getCtdItemDes();
     public Double getQty();
     public String getItemGroup();
-    public Double getTotalPatAmt();
+    public Double getPatientAmt();
 }

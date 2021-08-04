@@ -20,7 +20,10 @@ import java.util.List;
  */
 public interface InvoiceRepository extends JpaRepository<Invoice, Long>, JpaSpecificationExecutor<Invoice> {
 
-    @Query(value="SELECT TOTAL_SPNR_AMT as totalSpnrAmt,SPNR_AMT AS spnrAmt,CTD_CHRG_DT AS ctdChrgDt,CTD_ITEM_CD AS ctdItemCd,CTD_ITEM_DES AS ctdItemDes,QTY as qty,ITEM_GROUP AS itemGroup FROM SMART_DETAILED_OP WHERE invoice_no = :invoiceNo UNION SELECT TOTAL_SPNR_AMT as totalSpnrAmt,SPNR_AMT AS spnrAmt,CTD_CHRG_DT AS ctdChrgDt,CTD_ITEM_CD AS ctdItemCd,CTD_ITEM_DES AS ctdItemDes,QTY as qty,ITEM_GROUP AS itemGroup FROM SMART_DETAILED_IP WHERE  invoice_no = :invoiceNo", nativeQuery=true)
+    @Query(value="SELECT TOTAL_PAT_AMT as copay,TOTAL_SPNR_AMT AS totalSpnrAmt, PAT_AMT AS patientAmt, SPNR_AMT AS spnrAmt,CTD_CHRG_DT AS ctdChrgDt,CTD_ITEM_CD AS ctdItemCd,CTD_ITEM_DES AS ctdItemDes,QTY as qty,ITEM_GROUP AS itemGroup FROM SMART_DETAILED_OP WHERE invoice_no =:invoiceNo \n" +
+            "             UNION SELECT TOTAL_PAT_AMT as copay,TOTAL_SPNR_AMT AS totalSpnrAmt, PAT_AMT AS patientAmt, SPNR_AMT AS spnrAmt,CTD_CHRG_DT AS ctdChrgDt,CTD_ITEM_CD AS ctdItemCd,CTD_ITEM_DES AS ctdItemDes,QTY as qty,ITEM_GROUP AS itemGroup FROM SMART_DETAILED_IP WHERE  invoice_no =:invoiceNo\n" +
+            "             UNION SELECT TOTAL_PAT_AMT as copay,TOTAL_SPNR_AMT AS totalSpnrAmt, PAT_AMT AS patientAmt, SPNR_AMT AS spnrAmt,CTD_CHRG_DT AS ctdChrgDt,CTD_ITEM_CD AS ctdItemCd,CTD_ITEM_DES AS ctdItemDes,QTY as qty,ITEM_GROUP AS itemGroup FROM SMART_DOCTOR_IP WHERE  invoice_no = :invoiceNo", nativeQuery=true)
     List<InvoicelineInterface> findInvoices(@Param("invoiceNo") final String invoiceNo);
+
 
 }

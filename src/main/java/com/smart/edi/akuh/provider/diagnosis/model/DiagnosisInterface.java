@@ -4,9 +4,9 @@ import java.time.LocalDate;
 
 public interface DiagnosisInterface {
     public String getReceiptNo();
-    public LocalDate getBillDate();
-    public  LocalDate getAppointmentDate();
-    public LocalDate getCodingDate();
+    public String getBillDate();
+    public  String getAppointmentDate();
+    public String getCodingDate();
     public String getApptNo();
     public String getPin();
     public String getIcdCode();

@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public interface LogEdiDiagnosisRepository extends JpaRepository<LogEdiDiagnosis, Long> {
-    @Query(value="SELECT d from LogEdiDiagnosis d where d.receiptNo =:receiptNo AND d.icdCode =:icdCode  and  d.providerKey='SKSP_505' and d.billDate =:billDate")
-    Optional<Diagnosis>findDiagnosisByReceipNoAndProviderKey(@Param("receiptNo") String receiptNo, @Param("icdCode") String icdCode, @Param("billDate") LocalDate billDate);
+    @Query(value="SELECT d from LogEdiDiagnosis d where d.receiptNo =:receiptNo AND d.icdCode =:icdCode  and  d.providerKey=:providerKey and d.billDate =:billDate")
+    Optional<LogEdiDiagnosis>findDiagnosisByReceipNoAndProviderKey(@Param("receiptNo") String receiptNo, @Param("icdCode") String icdCode, @Param("providerKey") String providerKey, @Param("billDate") LocalDate billDate);
 
 }

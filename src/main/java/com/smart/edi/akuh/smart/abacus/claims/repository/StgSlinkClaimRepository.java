@@ -24,7 +24,7 @@ public interface StgSlinkClaimRepository extends JpaRepository<StgSlinkClaim, Lo
 //    @Query(value="Select d.invoice_Nr from stg_slink_claims d join fin_providers a on d.ip_address=a.provider_key where  d.backend_provider_status=:status AND d.insert_Date>= to_date('15-05-2021','dd-mm-yyyy') AND a.parent_provider='SKSPKDN_4' AND ROWNUM<=1000",nativeQuery = true)
 @Query(value="select st.invoice_nr\n" +
         "from stg_slink_claims st\n" +
-        "join fin_providers pr on st.ip_address=pr.provider_key and st.patient_medicalaid_code='UAP' and st.claim_type=0 and st.insert_date>='15-may-2021'\n" +
+        "join fin_providers pr on st.ip_address=pr.provider_key and st.claim_type=0 and st.insert_date>='15-may-2021'\n" +
         "and st.global_id like 'KE%' and st.backend_provider_status=:status\n" +
         "join fin_client_details cd on pr.parent_provider=cd.smart_code and cd.prov_id is not null and cd.is_edi_backendviews=1\n" +
         "and cd.is_edi_backend=1 and cd.smart_code=:providerKey", nativeQuery = true)

@@ -1,10 +1,9 @@
 package com.smart.edi.akuh.smart.abacus.diagnosis.model;
 
 import lombok.Data;
+import lombok.Generated;
 
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,6 +13,9 @@ import java.time.LocalDateTime;
 @Table(name="LOG_EDI_DIAGNOSIS", schema="ABACUS")
 public class LogEdiDiagnosis implements Serializable {
     @Id
+    @SequenceGenerator(name = "seq", sequenceName = "ABACUS.LOG_EDI_DIAG_SEQ", allocationSize = 1, initialValue = 1)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "seq")
+    private Long id;
     private String receiptNo;
     private LocalDate billDate;
     private LocalDate appointmentDate;
@@ -23,14 +25,13 @@ public class LogEdiDiagnosis implements Serializable {
     private String icdCode;
     private String description;
     private String diagType;
-    private Boolean isTransmitted;
+    private Integer isTransmitted;
     private String providerKey="SKSP_505";
     private Integer responseId;
     private String responseObjectcode;
     private LocalDateTime postTime;
     private String errorDesc;
     private Integer origClaimId;
-    private Integer id;
     private LocalDateTime insertTime;
     private String viewSource="DIAG_SOURCE";
     private Boolean status;
